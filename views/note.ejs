@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <%- include('partials/styles.ejs') %>
+
+</head>
+<body>
+  <%- include('partials/navbar.ejs') %>
+
+  <div class="container">
+    <h1>Bird Watching Note #<%= note.index %></h1>
+
+    <h3>Habitat: </h3>
+    <p><%= note.habitat %></p>
+
+    <h3>Date:</h3>
+    <p><%= note.date %></p>
+
+    <h3>Appearance:</h3>
+    <p><%= note.appearance %></p>
+
+    <h3>Behaviour:</h3>
+    <p><%= note.behaviour %></p>
+
+    <h3>Vocalisations:</h3>
+    <p><%= note.vocalisation %></p>
+
+    <h3>Flock Size:</h3>
+    <p><%= note.flock_size %></p>
+
+    <form action="/note/<%= note.index %>/delete?_method=DELETE" method="POST">
+      <input type="button" value="Edit" onclick="window.location.href='/note/<%= note.index %>/edit';" />
+      <input type="submit" value="Delete" />
+    </form>
+  </div>
+
+  <%- include('partials/scripts.ejs') %>
+
+</body>
+</html>
