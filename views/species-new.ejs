@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <%- include('partials/styles.ejs') %>
+
+</head>
+<body>
+  <%- include('partials/navbar.ejs') %>
+  
+  <div class="container">
+    <h1>New Species</h1>
+    <form action="/species" method="POST">
+      <label for="name">Common Name:</label><br />
+      <input type="text" id="name" name="name" value="" /><br />
+      
+      <label for="scientific_name">Scientific Name:</label><br />
+      <input type="text" id="scientific_name" name="scientific_name" value=""/><br />
+
+      <br />
+
+      <input type="submit" value="Submit" />
+    </form>
+  </div>
+
+  <%- include('partials/scripts.ejs') %>
+
+</body>
+</html>
