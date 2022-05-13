@@ -23,6 +23,10 @@
 // read and write files
 // import { readFile, writeFile } from 'fs';
 
+// ------------------------------ //
+// setting up app---------------- //
+// ------------------------------ //
+
 // express and express packages
 import express from 'express';
 import cookieParser from 'cookie-parser';
@@ -54,11 +58,15 @@ const pgConnectionConfigs = {
 const pool = new Pool(pgConnectionConfigs);
 // no need to pool.connect();
 
-// routes
+// ------------------------------ //
+// routes ----------------------- //
+// ------------------------------ //
+
+// display all notes on the homepage
 app.get('/', (request, response) => {
   console.log('GET: ALL NOTES');
 
-  const query = 'SELECT * FROM notes;';
+  const query = 'SELECT * FROM notes ORDER BY id ASC;';
 
   pool.query(query)
     .then((result) => {
@@ -71,20 +79,24 @@ app.get('/', (request, response) => {
     });
 });
 
+// display new note form
 app.get('/note', (request, response) => {
   console.log('GET: NEW NOTE FORM');
 
-  response.render('new-note');
+  response.render('note-new');
 });
 
+// send contents of new note to database
 app.post('/note', (request, response) => {
   console.log('POST: NEW NOTE FORM');
 
+  // get contents of form
   const note = JSON.parse(JSON.stringify(request.body));
   const {
     habitat, date, appearance, behaviour, vocalisation, flock_size,
   } = note;
 
+  // send to database
   const query = `INSERT INTO notes 
     (habitat, date, appearance, behaviour, vocalisation, flock_size) 
     VALUES ('${habitat}', '${date}', '${appearance}', '${behaviour}', '${vocalisation}', '${flock_size}');`;
@@ -99,16 +111,19 @@ app.post('/note', (request, response) => {
     });
 });
 
-app.get('/note/:index', (request, response) => {
-  const { index } = request.params;
-  console.log(`GET: NOTE ${index}`);
+// display single note
+app.get('/note/:id', (request, response) => {
+  // id of note from url (passed into URL from ejs)
+  const { id } = request.params;
+  console.log(`GET: NOTE ${id}`);
 
-  const query = 'SELECT * FROM notes;';
+  // get contents of note
+  const query = `SELECT * FROM notes WHERE id=${id};`;
 
   pool.query(query)
     .then((result) => {
-      const note = result.rows[index];
-      note.index = index;
+      const note = result.rows[0];
+      // and display on page
       response.render('note', { note });
     })
     .catch((error) => {
@@ -116,6 +131,79 @@ app.get('/note/:index', (request, response) => {
       response.send(error);
     });
 });
+
+// display edit form of existing note
+app.get('/note/:id/edit', (request, response) => {
+  // id of note from url (passed into URL from ejs)
+  const { id } = request.params;
+  console.log(`GET: EDIT NOTE ${id}`);
+
+  // get contents to fill up the form (same as /note/id)
+  const query = `SELECT * FROM notes WHERE id=${id};`;
+
+  pool.query(query)
+    .then((result) => {
+      const note = result.rows[0];
+      // but render the edit page instead
+      response.render('note-edit', { note });
+    })
+    .catch((error) => {
+      console.log(error);
+      response.send(error);
+    });
+});
+
+// send contents of edited note to database
+app.put('/note/:id/edit', (request, response) => {
+  const { id } = request.params;
+  console.log(`POST: EDIT NOTE ${id}`);
+
+  // get contents of form
+  const note = JSON.parse(JSON.stringify(request.body));
+  const {
+    habitat, date, appearance, behaviour, vocalisation, flock_size,
+  } = note;
+
+  // update values of table at specific id
+  const query = `UPDATE notes 
+    SET habitat='${habitat}', 
+      date='${date}', 
+      appearance='${appearance}', 
+      behaviour='${behaviour}', 
+      vocalisation='${vocalisation}', 
+      flock_size = '${flock_size}' 
+    WHERE id=${id};`;
+
+  pool.query(query)
+    .then((result) => {
+      response.redirect(`/note/${id}`);
+    })
+    .catch((error) => {
+      console.log(error);
+      response.send(error);
+    });
+});
+
+// delete note at id
+app.delete('/note/:id/delete', (request, response) => {
+  const { id } = request.params;
+  console.log(`POST: DELETE NOTE ${id}`);
+
+  const query = `DELETE FROM notes WHERE id=${id};`;
+
+  pool.query(query)
+    .then((result) => {
+      response.redirect('/');
+    })
+    .catch((error) => {
+      console.log(error);
+      response.send(error);
+    });
+});
+
+// ------------------------------ //
+// setting up server------------- //
+// ------------------------------ //
 
 // app port and listen
 const PORT = 3004;

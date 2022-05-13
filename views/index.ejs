@@ -15,8 +15,9 @@
   <div class="container">
     <h1>Sightings</h1>
     <hr />
-    <% notes.forEach((note, index) => { %>
-      <h3> <a href="/note/<%= index %>"> <%= index %>. <%= note.date, note.habitat %> </a></h3>
+    <% notes.forEach((note) => { %>
+      <!-- Making use of the actual id of notes, so they may not always be sequential -->
+      <h3> <a href="/note/<%= note.id %>"> <%= note.id %>. <%= note.date, note.habitat %> </a></h3>
       <br />
       <hr />
     <% }) %> 
