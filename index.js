@@ -202,6 +202,17 @@ app.delete('/note/:id/delete', (request, response) => {
 });
 
 // ------------------------------ //
+// routes: species--------------- //
+// ------------------------------ //
+
+// display new species form
+app.get('/species', (request, response) => {
+  console.log('GET: NEW SPECIES FORM');
+
+  response.render('species-new');
+});
+
+// ------------------------------ //
 // setting up server------------- //
 // ------------------------------ //
 
