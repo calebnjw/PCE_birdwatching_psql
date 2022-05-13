@@ -59,7 +59,7 @@ const pool = new Pool(pgConnectionConfigs);
 // no need to pool.connect();
 
 // ------------------------------ //
-// routes ----------------------- //
+// routes: notes----------------- //
 // ------------------------------ //
 
 // display all notes on the homepage
