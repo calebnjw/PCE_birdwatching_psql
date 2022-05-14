@@ -13,17 +13,17 @@
   <%- include('partials/navbar.ejs') %>
   
   <div class="container">
-    <h1>New Species</h1>
-    <form action="/species" method="POST">
+    <h1>Edit Species</h1>
+    <form action="/species/<%= species.species_id %>/edit?_method=PUT" method="POST">
       <label for="name">Common Name:</label><br />
-      <input type="text" id="name" name="name" value="" /><br />
+      <input type="text" id="name" name="name" value="<%= species.name %>" /><br />
       
       <label for="scientific_name">Scientific Name:</label><br />
-      <input type="text" id="scientific_name" name="scientific_name" value=""/><br />
+      <input type="text" id="scientific_name" name="scientific_name" value="<%= species.scientific_name %>"/><br />
 
       <br />
 
-      <input type="button" class="btn btn-tertiary" value="Cancel" onclick="window.location.href='/species/all';" />
+      <input type="button" class="btn btn-tertiary" value="Cancel" onclick="window.location.href='/species/<%= species.species_id %>';" />
       <input type="submit" class="btn btn-primary" value="Submit" />
     </form>
   </div>

@@ -13,13 +13,13 @@
   <%- include('partials/navbar.ejs') %>
   
   <div class="container">
-    <h1>Birdwatching Notes</h1>
+    <h1>Species</h1>
     <hr />
-    <button type="button" class="btn btn-primary" onclick="window.location.href='/note'">New Note</button>
+    <button type="button" class="btn btn-primary" onclick="window.location.href='/species'">New Species</button>
     <hr />
-    <% notes.forEach((note) => { %>
+    <% species.forEach((specie) => { %>
       <!-- Making use of the actual id of notes, so they may not always be sequential -->
-      <h3> <a href="/note/<%= note.note_id %>"> <%= note.note_id %>. <%= note.date %>, <%= note.habitat %> </a></h3>
+      <h3> <a href="/species/<%= specie.species_id %>"> <%= specie.species_id %>. <%= specie.name %> </a></h3>
       <br />
       <hr />
     <% }) %> 

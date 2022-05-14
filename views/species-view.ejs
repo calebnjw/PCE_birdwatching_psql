@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+
+  <%- include('partials/styles.ejs') %>
+
+</head>
+<body>
+  <%- include('partials/navbar.ejs') %>
+  
+  <div class="container">
+    <h1><%= data.species.name %> (<%= data.species.scientific_name %>)</h1>
+    <hr />
+    <form action="/species/<%= data.species.species_id %>/delete?_method=DELETE" method="POST">
+      <input type="button" class="btn btn-tertiary" onclick="window.location.href='/species/all'" value="Back">
+      <input type="button" class="btn btn-primary" onclick="window.location.href='/species/<%= data.species.species_id %>/edit'" value="Edit" >
+      <input type="submit" class="btn btn-primary" onclick="window.location.href='/species/<%= data.species.species_id %>/delete?_method=DELETE'" value="Delete" >
+    </form>
+    <hr />
+    <% data.notes.forEach((note) => { %>
+      <h3> <a href="/note/<%= note.note_id %>"> <%= note.note_id %>. <%= note.date %>, <%= note.habitat %> </a></h3>
+      <br />
+      <hr />
+    <% }) %>
+  </div>
+
+  <%- include('partials/scripts.ejs') %>
+
+</body>
+</html>

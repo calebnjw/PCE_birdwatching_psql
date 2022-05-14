@@ -14,7 +14,7 @@
 
   <div class="container">
     <!-- Making use of the actual id of notes, so they may not always be sequential -->
-    <h1>Note #<%= note.id %></h1>
+    <h1>Note #<%= note.note_id %></h1>
 
     <h3>Habitat: </h3>
     <p><%= note.habitat %></p>
@@ -33,10 +33,13 @@
 
     <h3>Flock Size:</h3>
     <p><%= note.flock_size %></p>
+    
+    <h3>Species ID:</h3>
+    <p><%= note.species_id %></p>
 
-    <form action="/note/<%= note.id %>/delete?_method=DELETE" method="POST">
-      <input type="button" value="Edit" onclick="window.location.href='/note/<%= note.id %>/edit';" />
-      <input type="submit" value="Delete" />
+    <form action="/note/<%= note.note_id %>/delete?_method=DELETE" method="POST">
+      <input type="button" class="btn btn-tertiary"value="Edit" onclick="window.location.href='/note/<%= note.note_id %>/edit';" />
+      <input type="submit" class="btn btn-primary"value="Delete" />
     </form>
   </div>
 
