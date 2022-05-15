@@ -27,13 +27,16 @@
 // import { readFile, writeFile } from 'fs';
 
 // ------------------------------ //
+// ------------------------------ //
 // setting up app---------------- //
+// ------------------------------ //
 // ------------------------------ //
 
 // express and express packages
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import methodOverride from 'method-override';
+import jsSHA from 'jssha';
 
 // postgres
 import pg from 'pg';
@@ -62,7 +65,23 @@ const pool = new Pool(pgConnectionConfigs);
 // no need to pool.connect();
 
 // ------------------------------ //
+// ------------------------------ //
+// helper functions-------------- //
+// ------------------------------ //
+// ------------------------------ //
+
+const getHashed = (input) => {
+  const hash = new jsSHA('SHA-512', 'TEXT', { encoding: 'UTF8' });
+  hash.update(input);
+  const output = hash.getHash('HEX');
+
+  return output;
+};
+
+// ------------------------------ //
+// ------------------------------ //
 // routes: notes----------------- //
+// ------------------------------ //
 // ------------------------------ //
 
 // display all notes on the homepage
@@ -206,7 +225,9 @@ app.delete('/note/:id/delete', (request, response) => {
 });
 
 // ------------------------------ //
+// ------------------------------ //
 // routes: species--------------- //
+// ------------------------------ //
 // ------------------------------ //
 
 // display new species form
@@ -249,7 +270,7 @@ app.get('/species/all', (request, response) => {
   pool.query(query)
     .then((result) => {
       const species = result.rows;
-      console.log(species);
+      // console.log(species);
       response.render('species-all', { species });
     })
     .catch((error) => {
@@ -270,7 +291,7 @@ app.get('/species/:id', (request, response) => {
   pool.query(speciesQuery)
     .then((result) => {
       data.species = result.rows[0];
-      console.log('DATA SPECIES', data);
+      // console.log('DATA SPECIES', data);
     })
     .then(() => {
       // get notes from selected species
@@ -288,7 +309,7 @@ app.get('/species/:id', (request, response) => {
       pool.query(query)
         .then((result) => {
           data.notes = result.rows;
-          console.log('notes', data.notes);
+          // console.log('notes', data.notes);
           response.render('species-view', { data });
         })
         .catch((error) => {
@@ -362,7 +383,79 @@ app.delete('/species/:id/delete', (request, response) => {
 });
 
 // ------------------------------ //
+// ------------------------------ //
+// routes: users----------------- //
+// ------------------------------ //
+// ------------------------------ //
+
+app.get('/signup', (request, response) => {
+  console.log('GET: SIGNUP FORM');
+
+  response.render('user-signup');
+});
+
+app.post('/signup', (request, response) => {
+  console.log('POST: NEW USER');
+
+  const {
+    first_name, last_name, username, password,
+  } = JSON.parse(JSON.stringify(request.body));
+  const hashedPassword = getHashed(password);
+
+  const query = `INSERT INTO users (first_name, last_name, username, password) 
+    VALUES ('${first_name}', '${last_name}', '${username}', '${hashedPassword}')`;
+
+  pool.query(query)
+    .then((result) => {
+      response.redirect('/login');
+    });
+});
+
+app.get('/login', (request, response) => {
+  console.log('GET: LOGIN FORM');
+
+  response.render('user-login');
+});
+
+app.post('/login', (request, response) => {
+  console.log('POST: USER DETAILS');
+
+  const {
+    username, password,
+  } = JSON.parse(JSON.stringify(request.body));
+  console.log(username, password);
+
+  const hashedPassword = getHashed(password);
+
+  const query = `SELECT * FROM users WHERE username='${username}'`;
+
+  pool.query(query)
+    .then((result) => {
+      if (result.rows.length !== 0) {
+        if (result.rows[0].password === hashedPassword) {
+          response.cookie('loggedIn', true);
+          response.redirect('/');
+        } else {
+          response.send('Wrong username or password. Try again.');
+        }
+      } else {
+        response.send('Wrong username or password. Try again.');
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      response.send(error);
+    });
+});
+
+app.delete('/logout', (request, response) => {
+  response.clearCookie('loggedIn');
+});
+
+// ------------------------------ //
+// ------------------------------ //
 // setting up server------------- //
+// ------------------------------ //
 // ------------------------------ //
 
 // app port and listen

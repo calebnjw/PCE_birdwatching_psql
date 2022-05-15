@@ -13,8 +13,18 @@
         <a class="nav-link" href="/species/all">Species</a>
       </li>
     </ul>
-    <form action="/login" class="form-inline my-2 my-lg-0" method="GET">
-      <input class="btn btn-primary my-2 my-sm-0" value="Login" type="submit" />
-    </form>
+    <% if (false) { %>
+      <div class="form-inline my-2 my-lg-0">
+        <ul class="navbar-nav">
+          <li class="nav-item">Hello!</li>
+        </ul>
+      </div>
+      <% } else { %>
+        <form action="/login" class="form-inline my-2 my-lg-0" method="GET">
+          <input type="button" class="btn btn-secondary my-2 mr-2 my-sm-0" onclick="window.location.href='/signup'" value="Sign Up" />
+          <input type="submit" class="btn btn-primary my-2 my-sm-0" value="Login" />
+        </form>
+      <% } %>
+
   </div>
 </nav>
