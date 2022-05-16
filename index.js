@@ -3,7 +3,7 @@
 // SELECT * FROM [table] ORDER BY [column] ASC/DESC;
 // SELECT [table1.column], [table2.column]... FROM [table1]
 // >> INNER JOIN [table2] ON [table1.column]=[table2.column]
-// INSERT INTO [table] ([column], [column]) VALUES ([value], [value]);
+// INSERT INTO [table] ([column], [column]) VALUES ('[value]', '[value]');
 // UPDATE [table] SET [column]=[value] WHERE [column]=[value];
 // DELETE FROM [table] WHERE [column]=[value];
 // ALTER TABLE [table] RENAME [column] TO [newName];
@@ -110,8 +110,9 @@ app.get('/note', (request, response) => {
 
 // send contents of new note to database
 app.post('/note', (request, response) => {
-  console.log('POST: NEW NOTE FORM');
+  console.log('POST: NEW NOTE');
 
+  // need to escape all ' in the input somehow... if not it'll just keep throwing an error
   // get contents of form
   const note = JSON.parse(JSON.stringify(request.body));
   const {
@@ -119,12 +120,12 @@ app.post('/note', (request, response) => {
   } = note;
 
   // send to database
-  const query = `INSERT INTO notes 
-    (habitat, date, appearance, behaviour, vocalisation, flock_size, species_id) 
+  // const query = 'SELECT * FROM notes;';
+  const query = `INSERT INTO notes (habitat, date, appearance, behaviour, vocalisation, flock_size, species_id) 
     VALUES ('${habitat}', '${date}', '${appearance}', '${behaviour}', '${vocalisation}', '${flock_size}', '${species_id}');`;
 
   pool.query(query)
-    .then((result) => {
+    .then(() => {
       response.redirect('/');
     })
     .catch((error) => {
@@ -198,7 +199,7 @@ app.put('/note/:id/edit', (request, response) => {
     WHERE note_id=${id};`;
 
   pool.query(query)
-    .then((result) => {
+    .then(() => {
       response.redirect(`/note/${id}`);
     })
     .catch((error) => {
@@ -215,7 +216,7 @@ app.delete('/note/:id/delete', (request, response) => {
   const query = `DELETE FROM notes WHERE note_id=${id};`;
 
   pool.query(query)
-    .then((result) => {
+    .then(() => {
       response.redirect('/');
     })
     .catch((error) => {
@@ -251,7 +252,7 @@ app.post('/species', (request, response) => {
     VALUES ('${name}', '${scientific_name}');`;
 
   pool.query(query)
-    .then((result) => {
+    .then(() => {
       response.redirect('/');
     })
     .catch((error) => {
@@ -353,7 +354,7 @@ app.put('/species/:id/edit', (request, response) => {
     WHERE species_id=${id};`;
 
   pool.query(query)
-    .then((result) => {
+    .then(() => {
       response.redirect('/species/all');
     })
     .catch((error) => {
@@ -372,7 +373,7 @@ app.delete('/species/:id/delete', (request, response) => {
     WHERE species_id=${id};`;
 
   pool.query(query)
-    .then((result) => {
+    .then(() => {
       console.log('Deleted');
       response.redirect('/species/all');
     })
@@ -402,11 +403,12 @@ app.post('/signup', (request, response) => {
   } = JSON.parse(JSON.stringify(request.body));
   const hashedPassword = getHashed(password);
 
-  const query = `INSERT INTO users (first_name, last_name, username, password) 
+  const query = `INSERT INTO users 
+    (first_name, last_name, username, password) 
     VALUES ('${first_name}', '${last_name}', '${username}', '${hashedPassword}')`;
 
   pool.query(query)
-    .then((result) => {
+    .then(() => {
       response.redirect('/login');
     });
 });
@@ -425,22 +427,31 @@ app.post('/login', (request, response) => {
   } = JSON.parse(JSON.stringify(request.body));
   console.log(username, password);
 
-  const hashedPassword = getHashed(password);
-
   const query = `SELECT * FROM users WHERE username='${username}'`;
 
   pool.query(query)
     .then((result) => {
-      if (result.rows.length !== 0) {
-        if (result.rows[0].password === hashedPassword) {
-          response.cookie('loggedIn', true);
-          response.redirect('/');
-        } else {
-          response.send('Wrong username or password. Try again.');
-        }
-      } else {
-        response.send('Wrong username or password. Try again.');
+      if (result.rows.length === 0) {
+        console.log('No match 1');
+        response.status(403).send('Wrong username or password. Try again.');
+        return;
       }
+
+      const hashedPassword = getHashed(password);
+
+      if (result.rows[0].password !== hashedPassword) {
+        console.log('No match 2');
+        response.status(403).send('Wrong username or password. Try again.');
+        return;
+      }
+
+      const {
+        user_id, first_name, last_name, username,
+      } = result.rows[0];
+
+      response.cookie('loggedIn', true);
+      response.cookie('user', [user_id, first_name, last_name, username]);
+      response.redirect('/');
     })
     .catch((error) => {
       console.log(error);
@@ -449,7 +460,15 @@ app.post('/login', (request, response) => {
 });
 
 app.delete('/logout', (request, response) => {
+  console.log('DELETE: LOG IN COOKIE');
+
+  if (request.cookies.loggedIn === undefined) {
+    response.status(403).send('Please log in first!');
+    return;
+  }
+
   response.clearCookie('loggedIn');
+  response.redirect('/');
 });
 
 // ------------------------------ //
